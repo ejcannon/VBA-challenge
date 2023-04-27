@@ -1,0 +1,128 @@
+Sub multipleyearstockdata()
+
+For Each ws In Worksheets
+
+ws.Cells(1, 9).Value = "Ticker"
+ws.Cells(1, 10).Value = "Yearly Change"
+ws.Cells(1, 11).Value = "Percent Change"
+ws.Cells(1, 12).Value = "Total Stock Volume"
+
+Dim ticker As String
+
+Dim yearlychange As Double
+
+Dim percentchange As Double
+
+Dim openprice As Double
+
+Dim closeprice As Double
+
+Dim totalvolume As Double
+totalvolume = 0
+
+Dim summarytablerow As Integer
+summarytablerow = 2
+
+lastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+For i = 2 To lastRow
+
+    If ws.Cells(i - 1, 1).Value <> ws.Cells(i, 1) Then
+    openprice = ws.Cells(i, 3).Value
+    ticker = ws.Cells(i, 1).Value
+    ws.Range("I" & summarytablerow).Value = ticker
+
+    End If
+
+    If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1) Then
+    closeprice = ws.Cells(i, 6)
+    totalvolume = totalvolume + ws.Cells(i, 7)
+    yearlychange = closeprice - openprice
+    percentchange = (closeprice / openprice) - 1
+    ws.Range("L" & summarytablerow).Value = totalvolume
+    ws.Range("J" & summarytablerow).Value = yearlychange
+    ws.Range("K" & summarytablerow).Value = percentchange
+    ws.Range("K" & summarytablerow).NumberFormat = "0.00%"
+    totalvolume = 0
+
+    Else
+    totalvolume = totalvolume + ws.Cells(i, 7)
+
+    End If
+
+    If yearlychange > 0 Then
+        ws.Range("J" & summarytablerow).Interior.ColorIndex = 4
+    ElseIf yearlychange < 0 Then
+        ws.Range("J" & summarytablerow).Interior.ColorIndex = 3
+    End If
+
+    If percentchange > 0 Then
+        ws.Range("K" & summarytablerow).Interior.ColorIndex = 4
+    ElseIf percentchange < 0 Then
+        ws.Range("K" & summarytablerow).Interior.ColorIndex = 3
+    End If
+    
+    If ws.Range("J" & summarytablerow).Value <> 0 And ws.Range("K" & summarytablerow).Value <> 0 Then
+        summarytablerow = summarytablerow + 1
+        yearlychange = 0
+        percentchange = 0
+    End If
+        
+Next i
+
+Next ws
+
+For Each ws In Worksheets
+
+Dim ticker2 As String
+
+Dim min As Double
+
+Dim max As Double
+
+Dim maxtotal As Double
+
+ws.Cells(1, 16).Value = "Ticker"
+ws.Cells(1, 17).Value = "Value"
+ws.Cells(2, 15).Value = "Greatest % Increase"
+ws.Cells(3, 15).Value = "Greatest % Decrease"
+ws.Cells(4, 15).Value = "Greatest Total Volume"
+
+
+For i = 2 To lastRow
+
+    For j = 9 To 12
+    
+    max = WorksheetFunction.max(ws.Range("K:K"))
+    min = WorksheetFunction.min(ws.Range("K:K"))
+    maxtotal = WorksheetFunction.max(ws.Range("L:L"))
+    
+    If ws.Cells(i, j).Value = max Then
+    ws.Cells(2, 17).Value = max
+    ws.Cells(2, 17).NumberFormat = "0.00%"
+    ticker2 = ws.Cells(i, j - 2).Value
+    ws.Cells(2, 16).Value = ticker2
+    End If
+    
+    If ws.Cells(i, j).Value = min Then
+    ws.Cells(3, 17).Value = min
+    ws.Cells(3, 17).NumberFormat = "0.00%"
+    ticker2 = ws.Cells(i, j - 2).Value
+    ws.Cells(3, 16).Value = ticker2
+    End If
+    
+    If ws.Cells(i, j).Value = maxtotal Then
+    ws.Cells(4, 17).Value = maxtotal
+    ticker2 = ws.Cells(i, j - 3).Value
+    ws.Cells(4, 16).Value = ticker2
+    End If
+    
+    Next j
+    
+Next i
+        
+ws.Columns("A:Q").AutoFit
+
+Next ws
+
+End Sub
